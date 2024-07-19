@@ -4,20 +4,17 @@ import DBpediaVisualization from './DBpediaVisualization';
 const App = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [entityData, setEntityData] = useState(null);
-  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleSearch = async () => {
     setLoading(true);
-    setError(null);
     try {
+      setError(null);
       // First, fetch the main entity
       const entityResponse = await fetch(
         `http://localhost:8000/api/entity/${searchTerm}`
       );
-      if (!entityResponse.ok) {
-        throw new Error(`HTTP error! status: ${entityResponse.status}`);
-      }
       const entityResult = await entityResponse.json();
 
       // Then, fetch related entities
@@ -31,15 +28,12 @@ const App = () => {
           body: JSON.stringify(entityResult),
         }
       );
-      if (!relatedResponse.ok) {
-        throw new Error(`HTTP error! status: ${relatedResponse.status}`);
-      }
       const relatedResult = await relatedResponse.json();
 
       setEntityData(relatedResult);
     } catch (error) {
       console.error('Error fetching data:', error);
-      setError(`Error fetching data: ${error.message}`);
+      setError('Failed to fetch data. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -63,7 +57,7 @@ const App = () => {
           {loading ? 'Searching...' : 'Search'}
         </button>
       </div>
-      {error && <p className='text-red-500'>{error}</p>}
+      {error && <div className='text-red-500 mb-4'>{error}</div>}
       {entityData && <DBpediaVisualization data={entityData} />}
     </div>
   );
